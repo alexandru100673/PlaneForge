@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction
-from PySide6.QtWidgets import QLabel, QMainWindow, QToolBar
+from PySide6.QtWidgets import QFileDialog, QLabel, QMainWindow, QToolBar
 
 
 class MainWindow(QMainWindow):
@@ -29,7 +31,7 @@ class MainWindow(QMainWindow):
         self.open_pdf_action = QAction("Open PDF...", self)
         self.open_pdf_action.setShortcut("Ctrl+O")
         self.open_pdf_action.setStatusTip("Open a PDF plan")
-        self.open_pdf_action.setEnabled(False)
+        self.open_pdf_action.triggered.connect(self.open_pdf)
 
         self.exit_action = QAction("Exit", self)
         self.exit_action.setShortcut("Ctrl+Q")
@@ -57,9 +59,9 @@ class MainWindow(QMainWindow):
 
     def _create_central_widget(self) -> None:
         """Create the initial empty document workspace."""
-        placeholder = QLabel("No PDF loaded")
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setStyleSheet(
+        self.placeholder = QLabel("No PDF loaded")
+        self.placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.placeholder.setStyleSheet(
             """
             QLabel {
                 color: #808080;
@@ -70,7 +72,25 @@ class MainWindow(QMainWindow):
             """
         )
 
-        self.setCentralWidget(placeholder)
+        self.setCentralWidget(self.placeholder)
+
+    def open_pdf(self) -> None:
+        """Open a Windows file dialog and select a PDF document."""
+        file_path, _selected_filter = QFileDialog.getOpenFileName(
+            self,
+            "Open PDF plan",
+            "",
+            "PDF files (*.pdf)",
+        )
+
+        if not file_path:
+            self.statusBar().showMessage("Open PDF cancelled", 3000)
+            return
+
+        selected_pdf = Path(file_path)
+
+        self.placeholder.setText(selected_pdf.name)
+        self.statusBar().showMessage(f"Selected: {selected_pdf}")
 
     def _create_status_bar(self) -> None:
         """Create the application status bar."""
