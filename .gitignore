@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.pyc
+.vscode/settings.json
+.idea/
+dist/
+build/
+output/
+*.log
+*.tmp
